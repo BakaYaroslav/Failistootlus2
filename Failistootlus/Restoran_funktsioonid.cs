@@ -7,13 +7,16 @@ using System.Xml.Linq;
 
 namespace Failistootlus
 {
-    internal class Restoran_funktsioonid
+    public class Restoran_funktsioonid
     {
         static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Koostisosad.txt");
         static string retseptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Retseptid.txt");
         static string menuuPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Menuu.txt");
+        static List<menuu> menuuList = new List<menuu>();
         static List<string> list = new List<string>();
 
+
+       
         public static void Lemmiktoidu_salvestamine_faili()
         {
             try
@@ -23,10 +26,13 @@ namespace Failistootlus
                 Console.WriteLine("Olemasolevad toidud");
                 foreach (string rida in File.ReadAllLines(retseptPath))
                     Console.WriteLine(rida);
+
                 Console.WriteLine();
                 Console.Write("Sisesta uus toidu nimi: ");
+
                 string toit = Console.ReadLine();
                 StreamWriter retseptWriter = new StreamWriter(retseptPath, true);
+
                 retseptWriter.WriteLine(toit);
                 retseptWriter.Close();
 
@@ -148,7 +154,7 @@ namespace Failistootlus
 
         public static void ItaaliaRestoran()
         {
-            Console.WriteLine("\n--- 6. ITAALIA RESTORANI MENÜÜ (TUPLE) ---");
+            Console.WriteLine("--- 6. ITAALIA RESTORANI MENÜÜ ---");
 
             if (!File.Exists(menuuPath))
             {
@@ -174,7 +180,7 @@ namespace Failistootlus
                 }
                 Console.Clear();
                 Console.WriteLine("===========================================");
-                Console.WriteLine("          * LA BELLA ITALIA *          ");
+                Console.WriteLine("               *  ITALIA *          ");
                 Console.WriteLine("===========================================\n");
                 foreach (var toit in menyyList)
                 {
@@ -188,6 +194,148 @@ namespace Failistootlus
             catch (Exception ex)
             {
                 Console.WriteLine("Viga restoranimenüü töötlemisel: " + ex.Message);
+            }
+        }
+
+
+
+
+
+        public static void ItaaliaRestoraanKlassiga()
+        {
+            Console.Clear();
+            Console.WriteLine("tere tulemast Itaalia restorani!");
+            Console.WriteLine("================================");
+            Console.WriteLine("             Menüü              ");
+            Console.WriteLine("================================");
+            if (menuuList.Count == 0)
+            {
+                Console.WriteLine("menüü on tühi. palun laadige andmed failist. ");
+            }
+            else
+            {
+                foreach (menuu item in menuuList)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Nimetus: {item.Nimetus}");
+                    Console.ResetColor();
+                    Console.WriteLine($"Koostisosad: {string.Join(", ", item.Koostisosad)}");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"hind: {item.Hind} €");
+                    Console.ResetColor();
+                    Console.WriteLine("-------------------------------------");
+
+
+
+                }
+            }
+
+        }
+        public static void LaeAndmedFailist()
+        {
+            if (File.Exists(menuuPath))
+            {
+                string[] osad = File.ReadAllLines(menuuPath);
+                foreach (string line in osad)
+                {
+                    string[] parts = line.Split(';');
+                    if (parts.Length == 3)
+                    {
+                        string nimetus = parts[0];
+                        List<string> koostisosad = new List<string>(parts[1].Split(", "));
+                        double hind = double.Parse(parts[2].Replace('.', ','));
+ 
+                        menuu menuuItem = new menuu(nimetus, koostisosad, hind);
+                        menuuList.Add(menuuItem);
+                    }
+                }
+                Console.WriteLine($"andmed on adukalt laaditud. Kokku on {menuuList.Count} toitu");
+            }
+            else
+            {
+                Console.WriteLine("andmefaili ei leidnud. ");
+            }
+        }
+
+        public static void LisaUusToit()
+        {
+            Console.WriteLine("sisesta uue toitu info...  ");
+            Console.WriteLine("Nimetus:  ");
+            string nimetus = Console.ReadLine();
+            Console.WriteLine("Koostisosad: ");
+            List<string> koostisosad = new List<string>();
+            while (true)
+            {
+                Console.WriteLine("Aine (või vajuta Enter, et lõpetada): ");
+                string aine = Console.ReadLine();
+                if (string.IsNullOrEmpty(aine))
+                {
+                    break; 
+                }
+                koostisosad.Add(aine);
+            }
+            Console.WriteLine("sisesta hind (nt 12.99): ");
+            double hind = double.Parse(Console.ReadLine().Replace('.', ','));
+
+            menuuList.Add(new menuu(nimetus, koostisosad, hind));
+            Console.WriteLine($"uus toit {nimetus} on lisatud.");
+           
+        }
+
+        public static void SalvestaAndmedFaili()
+        {
+            Console.WriteLine("salvestamine andmeid faili... ");
+            try
+            {
+                List<string> failiread = new List<string>(); 
+                foreach ( menuu item in menuuList)
+                {
+                    failiread.Add(item.VormindaFailiJaoksRea());
+                }
+                File.WriteAllLines(menuuPath, failiread);
+                Console.WriteLine("andmed on salvestatud!");
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("viga: ", e);
+            }
+        }
+
+        public static void KustutaToit()
+        {
+            Console.WriteLine("sisesta kustutava toidu nimetus:  ");
+            string nimetus = Console.ReadLine();
+            menuu itemToRemove = menuuList.Find(item => item.Nimetus.Equals(nimetus, StringComparison.OrdinalIgnoreCase));
+            if (itemToRemove != null)
+            {
+                menuuList.Remove(itemToRemove);
+                Console.WriteLine($"toit {nimetus} on menüüst kustutatud. ");
+            }
+            else
+            {
+                Console.WriteLine($"toitu nimega {nimetus} ei leidnud menüüst. ");
+            }
+        }
+
+        public static void InfoToit()
+        {
+            Console.WriteLine("sisesta toidu nimetus:  ");
+            string nimetus = Console.ReadLine();
+            menuu itemToInfo = menuuList.Find(item => item.Nimetus.Equals(nimetus, StringComparison.OrdinalIgnoreCase));
+            if (itemToInfo != null)
+            {
+               
+                Console.WriteLine($"toit {nimetus} on menüüst koostab: ");
+                foreach (menuu item in menuuList)
+                {
+                    Console.WriteLine($"Koostisosad: {string.Join(", ", item.Koostisosad)}");
+                }
+                   
+            }
+            else
+            {
+                Console.WriteLine($"toitu nimega {nimetus} ei leidnud menüüst. ");
             }
         }
     }
