@@ -11,6 +11,7 @@ namespace Failistootlus
     {
         static string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Koostisosad.txt");
         static string retseptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Retseptid.txt");
+        static string menuuPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Menuu.txt");
         static List<string> list = new List<string>();
 
         public static void Lemmiktoidu_salvestamine_faili()
@@ -129,23 +130,64 @@ namespace Failistootlus
                 Console.WriteLine($"{otsitav} ei ole retseptis.");
             return list;
         }
-        public static void Uuendatud_nimekirja_salvestamine(List<string> list) { try { Console.WriteLine("Praegune nimekiri"); for (int i = 0; i < list.Count; i++)Console.WriteLine($"  {i + 1}. {list[i]}"); File.WriteAllLines(path, list);Console.WriteLine("Uus retsept on edukalt faili salvestatud!");}catch (Exception e){Console.WriteLine($"Viga: {e}");}}
-         
-        public static Tuple<string, string, double> Itaalia_menüü()
+        public static void Uuendatud_nimekirja_salvestamine(List<string> list)
         {
-            List<Tuple<string, string, double>> menyylist = new List<Tuple<string, string, double>>();
+            try
+            {
+                Console.WriteLine("Praegune nimekiri");
+                for (int i = 0; i < list.Count; i++)
+                    Console.WriteLine($"  {i + 1}. {list[i]}"); 
+                File.WriteAllLines(path, list);
+                Console.WriteLine("Uus retsept on edukalt faili salvestatud!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Viga: {e}");
+            }
+        }
+
+        public static void ItaaliaRestoran()
+        {
+            Console.WriteLine("\n--- 6. ITAALIA RESTORANI MENÜÜ (TUPLE) ---");
+
+            if (!File.Exists(menuuPath))
+            {
+                string[] algAndmed = {
+                "Margherita pitsa;San Marzano tomatid, mozzarella, basiilik;8.50",
+                "Pasta Carbonara;Spagetid, guanciale, pecorino, muna;12.00",
+                "Tiramisu;Mascarpone, espresso, savoiardi;6.50"
+            };
+                File.WriteAllLines(menuuPath, algAndmed);
+            }
+
+            List<Tuple<string, string, double>> menyyList = new List<Tuple<string, string, double>>();
             try
             {
                 foreach (string rida in File.ReadAllLines(menuuPath))
-                    if (true)   
+                {
+                    string[] osad = rida.Split(';');
+                    if (osad.Length == 3)
                     {
-
+                        double hind = double.Parse(osad[2].Replace('.', ','));
+                        menyyList.Add(Tuple.Create(osad[0], osad[1], hind));
                     }
+                }
+                Console.Clear();
+                Console.WriteLine("===========================================");
+                Console.WriteLine("          * LA BELLA ITALIA *          ");
+                Console.WriteLine("===========================================\n");
+                foreach (var toit in menyyList)
+                {
+                    Console.WriteLine($"{toit.Item1.PadRight(30)} {toit.Item3:F2} Eur");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine($"   Koostis: {toit.Item2}");
+                    Console.ResetColor();
+                    Console.WriteLine();
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                Console.WriteLine("Viga restoranimenüü töötlemisel: " + ex.Message);
             }
         }
     }

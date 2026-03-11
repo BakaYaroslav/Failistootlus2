@@ -6,6 +6,7 @@ namespace Failistootlus
 {
     internal class Main_Restoran
     {
+        static List<string> list = new List<string>();
         public static void Main(string[] args)
         {
             while (true)
@@ -22,6 +23,9 @@ namespace Failistootlus
                     case "3": List<string> koostisosad= Restoran_funktsioonid.Koostisosade_muutmine_nimekirjas(); break;
 
                     case "4": Restoran_funktsioonid.Külmkapi_kontroll_ehk_otsing_listist(); break;
+                    
+                    case "5": Restoran_funktsioonid.Uuendatud_nimekirja_salvestamine(list); break;
+                    case "6": Restoran_funktsioonid.ItaaliaRestoran(); break;
                 }
             }
         }
